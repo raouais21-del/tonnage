@@ -6,6 +6,8 @@ import { Home } from './screens/Home';
 import { Program } from './screens/Program';
 import { Progress } from './screens/Progress';
 import { SessionScreen } from './screens/Session';
+import { SummaryScreen } from './screens/Summary';
+import { Intro } from './components/Intro';
 
 type Tab = 'home' | 'progress' | 'program';
 
@@ -18,6 +20,7 @@ const TABS: { id: Tab; label: string; Icon: typeof IconHome }[] = [
 export function App() {
   const [tab, setTab] = useState<Tab>('home');
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const [summaryId, setSummaryId] = useState<number | null>(null);
 
   const launch = async (workout: Workout) => {
     haptic();
@@ -35,7 +38,15 @@ export function App() {
   return (
     <>
       <div className="tab-pane" aria-hidden={tab !== 'home'}>
-        <Home onStart={launch} onResume={setSessionId} onOpenProgram={() => setTab('program')} />
+        <Home
+          onStart={launch}
+          onResume={setSessionId}
+          onOpenProgram={() => setTab('program')}
+          onShowSummary={(id) => {
+            haptic();
+            setSummaryId(id);
+          }}
+        />
       </div>
       <div className="tab-pane" aria-hidden={tab !== 'progress'}>
         <Progress />
@@ -60,6 +71,8 @@ export function App() {
       </nav>
 
       {sessionId !== null && <SessionScreen id={sessionId} onClose={() => setSessionId(null)} />}
+      {summaryId !== null && <SummaryScreen id={summaryId} onClose={() => setSummaryId(null)} />}
+      <Intro />
     </>
   );
 }

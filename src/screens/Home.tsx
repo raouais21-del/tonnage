@@ -20,13 +20,14 @@ interface Props {
   onStart: (w: Workout) => void;
   onResume: (sessionId: number) => void;
   onOpenProgram: () => void;
+  onShowSummary: (sessionId: number) => void;
 }
 
 const doneSets = (s: Session) => s.exercises.flatMap((e) => e.sets.filter((x) => x.done));
 const tonnage = (s: Session) => doneSets(s).reduce((t, x) => t + x.weight * x.reps, 0);
 const estMinutes = (w: Workout) => Math.round(w.items.reduce((t, it) => t + it.sets * (it.rest + 45), 0) / 60);
 
-export function Home({ onStart, onResume, onOpenProgram }: Props) {
+export function Home({ onStart, onResume, onOpenProgram, onShowSummary }: Props) {
   const workouts = useWorkouts();
   const sessions = useSessions();
   const { byId } = useExercises();
@@ -115,7 +116,7 @@ export function Home({ onStart, onResume, onOpenProgram }: Props) {
               <span>{doneSets(doneToday[doneToday.length - 1]).length} séries</span>
               <span>{fmtNum(Math.round(tonnage(doneToday[doneToday.length - 1])))} kg soulevés</span>
             </div>
-            <p className="small" style={{ fontWeight: 500 }}>Bien joué. Récupère bien.</p>
+            <HeroButton label="Voir le résumé" onClick={() => onShowSummary(doneToday[doneToday.length - 1].id!)} />
           </>
         ) : todayWorkout ? (
           <>

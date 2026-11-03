@@ -15,7 +15,8 @@
   /* Marges calées sur l'iPhone 13 Pro Max (428 × 926, encoche 47 px, barre d'accueil 34 px). */
   --gutter: 20px;
   --tab-h: 64px;
-  --tab-bottom: max(12px, var(--safe-bottom));
+  /* Barre de menu posée au ras de la barre d'accueil (20 px du bas sur iPhone à encoche). */
+  --tab-bottom: max(8px, calc(var(--safe-bottom) - 14px));
   color-scheme: dark;
 }
 
@@ -136,7 +137,33 @@ button:active:not(:disabled) { transform: scale(0.97); }
 @keyframes modal-in { from { transform: translateY(100%); } }
 @keyframes modal-out { to { transform: translateY(100%); } }
 
+/* ---------- Animation d'ouverture ---------- */
+.intro {
+  position: fixed; inset: 0; z-index: 100; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.intro.out { animation: intro-out 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+.intro-logo { position: relative; width: 140px; height: 140px; }
+.intro-logo svg { display: block; fill: var(--gold); animation: intro-lift 1.2s cubic-bezier(0.32, 0.72, 0, 1) 0.15s both; }
+.intro-bar { transform-origin: 50px 50px; animation: intro-bar 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both; }
+.intro-plate { animation: intro-plate 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.intro-plate.l1 { --dx: -14px; animation-delay: 0.25s; }
+.intro-plate.r1 { --dx: 14px; animation-delay: 0.25s; }
+.intro-plate.l2 { --dx: -20px; animation-delay: 0.38s; }
+.intro-plate.r2 { --dx: 20px; animation-delay: 0.38s; }
+.intro-word {
+  position: absolute; left: 50%; top: 120px; transform: translateX(-50%);
+  font-size: 26px; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; color: var(--text);
+  animation: intro-word 0.6s cubic-bezier(0.32, 0.72, 0, 1) 0.6s both;
+}
+@keyframes intro-bar { 0% { transform: scaleX(0.6); } 100% { transform: scaleX(1); } }
+@keyframes intro-plate { 0% { transform: translateX(var(--dx)); opacity: 0.4; } 100% { transform: none; opacity: 1; } }
+@keyframes intro-lift { 0%, 40% { transform: none; } 100% { transform: translateY(-22px); } }
+@keyframes intro-word { from { opacity: 0; transform: translate(-50%, 12px); letter-spacing: 12px; } }
+@keyframes intro-out { to { opacity: 0; transform: scale(1.08); } }
+
 @media (prefers-reduced-motion: reduce) {
+  .intro, .intro * { animation-duration: 0.01s !important; animation-delay: 0s !important; }
   .page, .sheet, .sheet-backdrop { animation-duration: 0.01s !important; }
 }
 
@@ -311,6 +338,14 @@ button:active:not(:disabled) { transform: scale(0.97); }
 .set-mark.done { background: var(--s3); color: var(--gold); }
 .set-mark.current { background: var(--gold); color: var(--on-gold); }
 .set-mark.todo { border: 1.5px solid var(--line); }
+
+.rir-row { display: flex; align-items: center; gap: 6px; padding: 6px 14px 0 50px; }
+.rir-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--muted); margin-right: 2px; }
+.rir-chip {
+  flex: 1; min-width: 0; height: 32px; border: 0; border-radius: 10px;
+  background: var(--s1); color: var(--muted); font-size: 13px; font-weight: 600;
+}
+.rir-chip[aria-pressed='true'] { background: var(--gold); color: var(--on-gold); }
 
 /* ---------- Graphiques ---------- */
 .bars { height: 130px; display: flex; align-items: flex-end; justify-content: flex-end; gap: 6px; }

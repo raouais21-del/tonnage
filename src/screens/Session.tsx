@@ -6,6 +6,7 @@ import { haptic } from '../haptics';
 import { IconCheck, IconDown, IconMinus, IconPlus } from '../components/Icons';
 import { Page } from '../components/Page';
 import { Sheet } from '../components/Sheet';
+import { SummaryBody } from './Summary';
 
 interface Props {
   id: number;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const RING = 2 * Math.PI * 25;
+const RIR_VALUES = [0, 1, 2, 3, 4, 5];
 
 /** La séance monte du bas comme un écran modal iOS. */
 export function SessionScreen({ id, onClose }: Props) {
@@ -63,6 +65,7 @@ function SessionBody({ id, onClose }: Props) {
   }, [rest, now]);
 
   if (!session) return null;
+  if (session.finishedAt !== null) return <SummaryBody session={session} onClose={onClose} />;
 
   const exercises = session.exercises;
   const firstOpen = exercises.findIndex((e) => e.sets.some((s) => !s.done));
@@ -105,6 +108,13 @@ function SessionBody({ id, onClose }: Props) {
     save(next);
   };
 
+  const setRir = (j: number, rir: number | null) => {
+    haptic();
+    const next = structuredClone(exercises);
+    next[ei].sets[j].rir = rir;
+    save(next);
+  };
+
   const addSet = () => {
     const next = structuredClone(exercises);
     const last = next[ei].sets[next[ei].sets.length - 1] ?? { weight: 0, reps: 10 };
@@ -123,13 +133,19 @@ function SessionBody({ id, onClose }: Props) {
   // On ferme d'abord (animation), puis on écrit en base, pour ne pas vider l'écran pendant qu'il descend.
   const afterClose = () => new Promise((r) => setTimeout(r, 320));
 
+  /** Termine la séance ; l'écran bascule alors sur le résumé. */
   const finish = async () => {
     haptic();
+    setEnding(false);
+    setRest(null);
     const anyDone = exercises.some((e) => e.sets.some((s) => s.done));
+    if (anyDone) {
+      await db.sessions.update(id, { finishedAt: Date.now() });
+      return;
+    }
     onClose();
     await afterClose();
-    if (anyDone) await db.sessions.update(id, { finishedAt: Date.now() });
-    else await db.sessions.delete(id);
+    await db.sessions.delete(id);
   };
 
   const abandon = async () => {
@@ -205,7 +221,7 @@ function SessionBody({ id, onClose }: Props) {
               </section>
             )}
 
-            <ol className="stack mt16" style={{ gap: 4 }}>
+            <ol className="stack mt16" style={{ gap: 10 }}>
               {ex.sets.map((s, j) => {
                 const state = s.done ? 'done' : j === si ? 'current' : 'todo';
                 return (
@@ -222,6 +238,21 @@ function SessionBody({ id, onClose }: Props) {
                         {fmtNum(s.weight)} kg × {s.reps}
                       </span>
                     </button>
+                    <div className="rir-row" role="group" aria-label={`RIR de la série ${j + 1}`}>
+                      <span className="rir-label">RIR</span>
+                      {RIR_VALUES.map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          className="rir-chip"
+                          aria-pressed={s.rir === v}
+                          aria-label={`${v === 5 ? '5 ou plus' : v} répétition${v > 1 ? 's' : ''} en réserve`}
+                          onClick={() => setRir(j, s.rir === v ? null : v)}
+                        >
+                          {v === 5 ? '5+' : v}
+                        </button>
+                      ))}
+                    </div>
                   </li>
                 );
               })}

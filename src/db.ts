@@ -24,6 +24,8 @@ export interface LoggedSet {
   weight: number;
   reps: number;
   done: boolean;
+  /** Répétitions en réserve (0 = échec). Absent si non renseigné. */
+  rir?: number | null;
 }
 
 export interface LoggedExercise {
