@@ -45,13 +45,13 @@ export interface Session {
   exercises: LoggedExercise[];
 }
 
-class TonnageDB extends Dexie {
+class ForgeDB extends Dexie {
   workouts!: Table<Workout, number>;
   sessions!: Table<Session, number>;
   customExercises!: Table<Exercise, string>;
 
   constructor() {
-    super('tonnage');
+    super('tonnage'); // nom d'origine conservé pour garder les données existantes
     this.version(1).stores({
       workouts: '++id',
       sessions: '++id, date, workoutId',
@@ -60,7 +60,7 @@ class TonnageDB extends Dexie {
   }
 }
 
-export const db = new TonnageDB();
+export const db = new ForgeDB();
 
 export function useWorkouts(): Workout[] | undefined {
   return useLiveQuery(() => db.workouts.toArray());
@@ -130,12 +130,12 @@ export async function exportData(): Promise<string> {
     db.sessions.toArray(),
     db.customExercises.toArray(),
   ]);
-  return JSON.stringify({ app: 'tonnage', version: 1, exportedAt: new Date().toISOString(), workouts, sessions, customExercises });
+  return JSON.stringify({ app: 'forgeu', version: 1, exportedAt: new Date().toISOString(), workouts, sessions, customExercises });
 }
 
 export async function importData(json: string) {
   const data = JSON.parse(json);
-  if (data?.app !== 'tonnage') throw new Error('Ce fichier ne vient pas de Tonnage.');
+  if (data?.app !== 'forgeu' && data?.app !== 'tonnage') throw new Error('Ce fichier ne vient pas de ForgeU.');
   await db.transaction('rw', db.workouts, db.sessions, db.customExercises, async () => {
     await Promise.all([db.workouts.clear(), db.sessions.clear(), db.customExercises.clear()]);
     await db.workouts.bulkAdd(data.workouts ?? []);

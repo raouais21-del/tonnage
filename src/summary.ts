@@ -96,7 +96,7 @@ export async function renderSummaryImage(sum: Summary): Promise<Blob> {
   ctx.fillStyle = C.gold;
   ctx.font = `700 30px ${FONT}`;
   ctx.letterSpacing = '6px';
-  ctx.fillText('TONNAGE', PAD, 120);
+  ctx.fillText('FORGEU', PAD, 120);
   ctx.letterSpacing = '0px';
   ctx.fillStyle = C.muted;
   ctx.font = `500 32px ${FONT}`;

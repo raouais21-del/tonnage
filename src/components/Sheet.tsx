@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Props {
   open: boolean;
@@ -104,7 +105,8 @@ export function Sheet({ open, onClose, title, children }: Props) {
   }, [mounted]);
 
   if (!mounted) return null;
-  return (
+  // Dans <body>, pour passer au-dessus de la barre de menu (voir Page).
+  return createPortal(
     <div className={`sheet-backdrop${closing ? ' closing' : ''}`} onClick={() => onCloseRef.current()}>
       <div
         ref={sheetRef}
@@ -120,6 +122,7 @@ export function Sheet({ open, onClose, title, children }: Props) {
         {title && <h2 className="sheet-title">{title}</h2>}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

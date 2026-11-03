@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { haptic } from '../haptics';
 
 interface Props {
@@ -94,9 +95,12 @@ export function Page({ kind = 'push', onClose, children }: Props) {
     };
   }, [kind]);
 
-  return (
+  // Rendue directement dans <body> : un onglet est en position fixe, donc son contexte
+  // d'empilement placerait sinon la page sous la barre de menu.
+  return createPortal(
     <div ref={ref} className={`page ${kind}${closing ? ' closing' : ''}`} role="dialog" aria-modal="true">
       {children(close)}
-    </div>
+    </div>,
+    document.body,
   );
 }

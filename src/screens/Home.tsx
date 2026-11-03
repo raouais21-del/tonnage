@@ -245,10 +245,10 @@ function SettingsSheet({ open, onClose }: { open: boolean; onClose: () => void }
 
   const doExport = async () => {
     const json = await exportData();
-    const name = `tonnage-${isoDate(new Date())}.json`;
+    const name = `forgeu-${isoDate(new Date())}.json`;
     const file = new File([json], name, { type: 'application/json' });
     if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Sauvegarde Tonnage' }).catch(() => {});
+      await navigator.share({ files: [file], title: 'Sauvegarde ForgeU' }).catch(() => {});
     } else {
       const url = URL.createObjectURL(file);
       const a = document.createElement('a');

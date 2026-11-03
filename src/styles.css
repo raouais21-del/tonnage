@@ -142,25 +142,40 @@ button:active:not(:disabled) { transform: scale(0.97); }
   position: fixed; inset: 0; z-index: 100; background: var(--bg);
   display: flex; align-items: center; justify-content: center;
 }
-.intro.out { animation: intro-out 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
-.intro-logo { position: relative; width: 140px; height: 140px; }
-.intro-logo svg { display: block; fill: var(--gold); animation: intro-lift 1.2s cubic-bezier(0.32, 0.72, 0, 1) 0.15s both; }
-.intro-bar { transform-origin: 50px 50px; animation: intro-bar 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both; }
-.intro-plate { animation: intro-plate 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-.intro-plate.l1 { --dx: -14px; animation-delay: 0.25s; }
-.intro-plate.r1 { --dx: 14px; animation-delay: 0.25s; }
-.intro-plate.l2 { --dx: -20px; animation-delay: 0.38s; }
-.intro-plate.r2 { --dx: 20px; animation-delay: 0.38s; }
-.intro-word {
-  position: absolute; left: 50%; top: 120px; transform: translateX(-50%);
-  font-size: 26px; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; color: var(--text);
-  animation: intro-word 0.6s cubic-bezier(0.32, 0.72, 0, 1) 0.6s both;
+.intro.out { animation: intro-fade 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards; }
+.intro-glow {
+  position: absolute; width: 360px; height: 360px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0) 65%);
+  animation: intro-glow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
-@keyframes intro-bar { 0% { transform: scaleX(0.6); } 100% { transform: scaleX(1); } }
-@keyframes intro-plate { 0% { transform: translateX(var(--dx)); opacity: 0.4; } 100% { transform: none; opacity: 1; } }
-@keyframes intro-lift { 0%, 40% { transform: none; } 100% { transform: translateY(-22px); } }
-@keyframes intro-word { from { opacity: 0; transform: translate(-50%, 12px); letter-spacing: 12px; } }
-@keyframes intro-out { to { opacity: 0; transform: scale(1.08); } }
+.intro-content {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 18px;
+}
+.intro.out .intro-content { animation: intro-leave 0.45s cubic-bezier(0.4, 0, 1, 1) forwards; }
+.intro-mark { display: block; fill: var(--gold); overflow: visible; animation: intro-mark 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.intro-bar { transform-box: fill-box; transform-origin: center; animation: intro-bar 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.intro-plate { transform-box: fill-box; transform-origin: center; animation: intro-plate 0.75s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.intro-plate.in-l { --dx: 14px; animation-delay: 0.18s; }
+.intro-plate.in-r { --dx: -14px; animation-delay: 0.18s; }
+.intro-plate.out-l { --dx: 18px; animation-delay: 0.28s; }
+.intro-plate.out-r { --dx: -18px; animation-delay: 0.28s; }
+.intro-word {
+  display: flex; font-size: 40px; font-weight: 700; letter-spacing: -1px; line-height: 1; color: var(--text);
+}
+.intro-word span { display: inline-block; animation: intro-letter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.intro-word .gold { color: var(--gold); margin-left: 1px; }
+.intro-line {
+  width: 56px; height: 2px; border-radius: 1px; background: var(--gold);
+  transform-origin: center; animation: intro-line 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.95s both;
+}
+@keyframes intro-mark { from { opacity: 0; transform: scale(0.82); filter: blur(10px); } }
+@keyframes intro-bar { from { transform: scaleX(0); } }
+@keyframes intro-plate { from { opacity: 0; transform: translateX(var(--dx)) scaleY(0.6); } }
+@keyframes intro-letter { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } }
+@keyframes intro-line { from { transform: scaleX(0); opacity: 0; } }
+@keyframes intro-glow { from { opacity: 0; transform: scale(0.6); } }
+@keyframes intro-leave { to { opacity: 0; transform: translateY(-6px) scale(0.97); filter: blur(4px); } }
+@keyframes intro-fade { to { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   .intro, .intro * { animation-duration: 0.01s !important; animation-delay: 0s !important; }

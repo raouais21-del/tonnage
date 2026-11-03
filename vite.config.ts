@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['apple-touch-icon.png', 'favicon.png', 'splash-1284x2778.png'],
       manifest: {
-        name: 'Tonnage',
-        short_name: 'Tonnage',
+        name: 'ForgeU',
+        short_name: 'ForgeU',
         description: 'Carnet de musculation personnel',
         lang: 'fr',
         start_url: './',
