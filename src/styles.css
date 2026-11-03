@@ -211,6 +211,12 @@ button:active:not(:disabled) { transform: scale(0.97); }
   font-size: 14px; font-weight: 600; color: var(--muted);
 }
 .item-title { font-size: 15px; font-weight: 600; }
+.date-badge {
+  width: 48px; height: 52px; flex: none; border-radius: 14px; background: var(--s2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
+}
+.date-day { font-size: 20px; font-weight: 700; color: var(--gold); }
+.date-wd { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
 .item-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
 
 /* ---------- Boutons ---------- */
@@ -293,13 +299,14 @@ button:active:not(:disabled) { transform: scale(0.97); }
   bottom: var(--tab-bottom); width: min(480px, calc(100% - 2 * var(--gutter)));
   height: var(--tab-h); padding: 8px; border-radius: 32px; background: var(--s1);
   box-shadow: 0 0 0 1px var(--s2), 0 -20px 40px 10px var(--bg);
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;
+  display: flex; gap: 4px;
 }
 .tabbar button {
+  flex: 1 1 0; min-width: 0; white-space: nowrap; transition: flex-grow 0.3s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.2s ease;
   border: 0; border-radius: 24px; background: transparent; color: var(--muted);
   display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600;
 }
-.tabbar button[aria-current='page'] { background: var(--gold); color: var(--on-gold); }
+.tabbar button[aria-current='page'] { flex-grow: 2.2; background: var(--gold); color: var(--on-gold); }
 
 /* ---------- Feuille du bas ---------- */
 .sheet-backdrop {

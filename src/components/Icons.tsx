@@ -23,7 +23,8 @@ function Svg({ size = 20, children, ...rest }: P) {
 
 export const IconHome = (p: P) => <Svg {...p}><path d="M4 10.5L12 4l8 6.5V20h-5v-6H9v6H4z" /></Svg>;
 export const IconChart = (p: P) => <Svg {...p}><path d="M5 20v-8M12 20V5M19 20v-5" /></Svg>;
-export const IconList = (p: P) => <Svg {...p}><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" /></Svg>;
+export const IconHistory = (p: P) => <Svg {...p}><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></Svg>;
+export const IconList =(p: P) => <Svg {...p}><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" /></Svg>;
 export const IconClose = (p: P) => <Svg {...p}><path d="M6 6l12 12M18 6L6 18" /></Svg>;
 export const IconCheck = (p: P) => <Svg strokeWidth={3} {...p}><path d="M5 12l5 5L19 7" /></Svg>;
 export const IconPlus = (p: P) => <Svg {...p}><path d="M12 5v14M5 12h14" /></Svg>;

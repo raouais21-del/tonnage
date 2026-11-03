@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { IconChart, IconHome, IconList } from './components/Icons';
+import { IconChart, IconHistory, IconHome, IconList } from './components/Icons';
 import { startSession, type Workout } from './db';
 import { haptic } from './haptics';
+import { History } from './screens/History';
 import { Home } from './screens/Home';
 import { Program } from './screens/Program';
 import { Progress } from './screens/Progress';
@@ -9,11 +10,12 @@ import { SessionScreen } from './screens/Session';
 import { SummaryScreen } from './screens/Summary';
 import { Intro } from './components/Intro';
 
-type Tab = 'home' | 'progress' | 'program';
+type Tab = 'home' | 'progress' | 'history' | 'program';
 
 const TABS: { id: Tab; label: string; Icon: typeof IconHome }[] = [
   { id: 'home', label: 'Accueil', Icon: IconHome },
   { id: 'progress', label: 'Progrès', Icon: IconChart },
+  { id: 'history', label: 'Historique', Icon: IconHistory },
   { id: 'program', label: 'Programme', Icon: IconList },
 ];
 
@@ -34,7 +36,12 @@ export function App() {
     setTab(id);
   };
 
-  // Les trois onglets restent montés : chacun garde sa position de défilement et son état.
+  const openSummary = (id: number) => {
+    haptic();
+    setSummaryId(id);
+  };
+
+  // Les onglets restent montés : chacun garde sa position de défilement et son état.
   return (
     <>
       <div className="tab-pane" aria-hidden={tab !== 'home'}>
@@ -42,14 +49,14 @@ export function App() {
           onStart={launch}
           onResume={setSessionId}
           onOpenProgram={() => setTab('program')}
-          onShowSummary={(id) => {
-            haptic();
-            setSummaryId(id);
-          }}
+          onShowSummary={openSummary}
         />
       </div>
       <div className="tab-pane" aria-hidden={tab !== 'progress'}>
         <Progress />
+      </div>
+      <div className="tab-pane" aria-hidden={tab !== 'history'}>
+        <History onOpen={openSummary} />
       </div>
       <div className="tab-pane" aria-hidden={tab !== 'program'}>
         <Program />
