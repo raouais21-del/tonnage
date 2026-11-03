@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { IconChart, IconHome, IconList } from './components/Icons';
 import { startSession, type Workout } from './db';
+import { haptic } from './haptics';
 import { Home } from './screens/Home';
 import { Program } from './screens/Program';
 import { Progress } from './screens/Progress';
@@ -18,13 +19,30 @@ export function App() {
   const [tab, setTab] = useState<Tab>('home');
   const [sessionId, setSessionId] = useState<number | null>(null);
 
-  const launch = async (workout: Workout) => setSessionId(await startSession(workout));
+  const launch = async (workout: Workout) => {
+    haptic();
+    setSessionId(await startSession(workout));
+  };
 
+  const selectTab = (id: Tab) => {
+    haptic();
+    // Toucher l'onglet déjà ouvert remonte en haut, comme sur iOS.
+    if (id === tab) document.getElementById(`scroll-${id}`)?.scrollTo({ top: 0, behavior: 'smooth' });
+    setTab(id);
+  };
+
+  // Les trois onglets restent montés : chacun garde sa position de défilement et son état.
   return (
     <>
-      {tab === 'home' && <Home onStart={launch} onResume={setSessionId} onOpenProgram={() => setTab('program')} />}
-      {tab === 'progress' && <Progress />}
-      {tab === 'program' && <Program />}
+      <div className="tab-pane" aria-hidden={tab !== 'home'}>
+        <Home onStart={launch} onResume={setSessionId} onOpenProgram={() => setTab('program')} />
+      </div>
+      <div className="tab-pane" aria-hidden={tab !== 'progress'}>
+        <Progress />
+      </div>
+      <div className="tab-pane" aria-hidden={tab !== 'program'}>
+        <Program />
+      </div>
 
       <nav className="tabbar" aria-label="Navigation principale">
         {TABS.map(({ id, label, Icon }) => (
@@ -33,7 +51,7 @@ export function App() {
             type="button"
             aria-current={tab === id ? 'page' : undefined}
             aria-label={label}
-            onClick={() => setTab(id)}
+            onClick={() => selectTab(id)}
           >
             <Icon size={tab === id ? 18 : 20} />
             {tab === id && label}

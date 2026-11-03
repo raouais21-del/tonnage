@@ -1,23 +1,28 @@
 import { useState } from 'react';
 import { claimDays, db, useWorkouts, type Workout } from '../db';
 import { DAYS } from '../utils';
+import { haptic } from '../haptics';
 import { IconCheck, IconChevron, IconPlus } from '../components/Icons';
+import { Screen } from '../components/Screen';
 import { Sheet } from '../components/Sheet';
 import { ExerciseLibrary } from './ExerciseLibrary';
 import { WorkoutEditor } from './WorkoutEditor';
 
 export function Program() {
   const [view, setView] = useState<'workouts' | 'exercises'>('workouts');
+  const pick = (v: typeof view) => {
+    haptic();
+    setView(v);
+  };
 
   return (
-    <main className="screen">
-      <h1 className="title">Programme</h1>
-      <div className="segmented mt16" role="group" aria-label="Section">
-        <button type="button" aria-pressed={view === 'workouts'} onClick={() => setView('workouts')}>Séances</button>
-        <button type="button" aria-pressed={view === 'exercises'} onClick={() => setView('exercises')}>Exercices</button>
+    <Screen id="scroll-program" title="Programme">
+      <div className="segmented mt8" role="group" aria-label="Section">
+        <button type="button" aria-pressed={view === 'workouts'} onClick={() => pick('workouts')}>Séances</button>
+        <button type="button" aria-pressed={view === 'exercises'} onClick={() => pick('exercises')}>Exercices</button>
       </div>
       <div className="mt16">{view === 'workouts' ? <Workouts /> : <ExerciseLibrary />}</div>
-    </main>
+    </Screen>
   );
 }
 
@@ -30,6 +35,8 @@ function Workouts() {
   const byDay = (d: number) => workouts.find((w) => w.days.includes(d));
 
   const assign = async (day: number, workout: Workout | null) => {
+    haptic();
+    setDayPick(null);
     if (workout) {
       await claimDays(workout.id!, [day]);
       if (!workout.days.includes(day)) await db.workouts.update(workout.id!, { days: [...workout.days, day].sort() });
@@ -37,7 +44,6 @@ function Workouts() {
       const current = byDay(day);
       if (current) await db.workouts.update(current.id!, { days: current.days.filter((x) => x !== day) });
     }
-    setDayPick(null);
   };
 
   return (
@@ -51,7 +57,7 @@ function Workouts() {
               <li key={d}>
                 <button
                   type="button"
-                  className="between"
+                  className="between week-row"
                   style={{ width: '100%', height: 48, padding: '0 10px', border: 0, background: 'transparent', borderRadius: 14 }}
                   onClick={() => setDayPick(d)}
                 >

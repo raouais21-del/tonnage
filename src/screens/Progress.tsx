@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { GROUPS } from '../catalog';
 import { finishedSessions, useExercises, useSessions } from '../db';
 import { estimate1RM, fmtNum, isoDate } from '../utils';
+import { haptic } from '../haptics';
+import { Screen } from '../components/Screen';
 
 export function Progress() {
   const sessions = useSessions();
   const { byId } = useExercises();
   const [selected, setSelected] = useState<string | null>(null);
 
-  if (!sessions) return <main className="screen" />;
+  if (!sessions) return null;
   const done = finishedSessions(sessions);
 
   // Exercices pratiqués, du plus fréquent au moins fréquent.
@@ -19,13 +21,12 @@ export function Progress() {
 
   if (practiced.length === 0) {
     return (
-      <main className="screen">
-        <h1 className="title">Progrès</h1>
+      <Screen id="scroll-progress" title="Progrès">
         <div className="empty mt24">
           <p className="h2">Pas encore de données</p>
           <p className="small">Termine ta première séance pour voir ta progression ici.</p>
         </div>
-      </main>
+      </Screen>
     );
   }
 
@@ -61,12 +62,19 @@ export function Progress() {
   const maxGroup = Math.max(1, ...perGroup.values());
 
   return (
-    <main className="screen">
-      <h1 className="title">Progrès</h1>
-
-      <div className="chips mt16" role="group" aria-label="Exercice">
+    <Screen id="scroll-progress" title="Progrès">
+      <div className="chips mt12" role="group" aria-label="Exercice">
         {practiced.map((id) => (
-          <button key={id} type="button" className="chip" aria-pressed={id === exId} onClick={() => setSelected(id)}>
+          <button
+            key={id}
+            type="button"
+            className="chip"
+            aria-pressed={id === exId}
+            onClick={() => {
+              haptic();
+              setSelected(id);
+            }}
+          >
             {byId.get(id)?.name ?? 'Exercice supprimé'}
           </button>
         ))}
@@ -124,7 +132,7 @@ export function Progress() {
           </ul>
         </section>
       )}
-    </main>
+    </Screen>
   );
 }
 

@@ -13,6 +13,7 @@ import {
 } from '../db';
 import { DAYS, DAYS_SHORT, dayIndex, fmtLongDate, fmtNum, isoDate, weekDates } from '../utils';
 import { IconArrow, IconCheck, IconSettings } from '../components/Icons';
+import { Screen } from '../components/Screen';
 import { Sheet } from '../components/Sheet';
 
 interface Props {
@@ -32,7 +33,7 @@ export function Home({ onStart, onResume, onOpenProgram }: Props) {
   const [picker, setPicker] = useState(false);
   const [settings, setSettings] = useState(false);
 
-  if (!workouts || !sessions) return <main className="screen" />;
+  if (!workouts || !sessions) return null;
 
   const now = new Date();
   const today = dayIndex(now);
@@ -57,16 +58,23 @@ export function Home({ onStart, onResume, onOpenProgram }: Props) {
   const weekTonnage = weekSessions.reduce((t, s) => t + tonnage(s), 0);
 
   return (
-    <main className="screen">
-      <header className="between">
-        <div>
-          <p className="eyebrow">{fmtLongDate(now)}</p>
-          <h1 className="title" style={{ fontSize: 26 }}>Bonjour</h1>
-        </div>
-        <button type="button" className="icon-btn" aria-label="Sauvegarde et réglages" onClick={() => setSettings(true)}>
-          <IconSettings />
+    <Screen
+      id="scroll-home"
+      title="Bonjour"
+      eyebrow={fmtLongDate(now)}
+      right={
+        <button type="button" className="nav-btn" aria-label="Sauvegarde et réglages" onClick={() => setSettings(true)}>
+          <IconSettings size={22} />
         </button>
-      </header>
+      }
+    >
+      {showInstallHint && (
+        <div className="tile mt8 row" style={{ alignItems: 'flex-start' }}>
+          <p className="small grow">
+            Pour l’utiliser comme une vraie app : dans Safari, touche <strong>Partager</strong> puis <strong>Sur l’écran d’accueil</strong>.
+          </p>
+        </div>
+      )}
 
       <ul className="week mt16" aria-label="Cette semaine">
         {week.map((d, i) => {
@@ -210,9 +218,14 @@ export function Home({ onStart, onResume, onOpenProgram }: Props) {
       </Sheet>
 
       <SettingsSheet open={settings} onClose={() => setSettings(false)} />
-    </main>
+    </Screen>
   );
 }
+
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const isStandalone =
+  window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
+const showInstallHint = isIOS && !isStandalone;
 
 function HeroButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (

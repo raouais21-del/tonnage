@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, useExercises, type LoggedExercise, type LoggedSet } from '../db';
 import { fmtClock, fmtNum, platesPerSide } from '../utils';
-import { IconCheck, IconClose, IconMinus, IconPlus } from '../components/Icons';
+import { haptic } from '../haptics';
+import { IconCheck, IconDown, IconMinus, IconPlus } from '../components/Icons';
+import { Page } from '../components/Page';
 import { Sheet } from '../components/Sheet';
 
 interface Props {
@@ -12,7 +14,16 @@ interface Props {
 
 const RING = 2 * Math.PI * 25;
 
+/** La séance monte du bas comme un écran modal iOS. */
 export function SessionScreen({ id, onClose }: Props) {
+  return (
+    <Page kind="modal" onClose={onClose}>
+      {(close) => <SessionBody id={id} onClose={close} />}
+    </Page>
+  );
+}
+
+function SessionBody({ id, onClose }: Props) {
   const session = useLiveQuery(() => db.sessions.get(id), [id]);
   const { byId } = useExercises();
   const [picked, setPicked] = useState<number | null>(null);
@@ -25,7 +36,33 @@ export function SessionScreen({ id, onClose }: Props) {
     return () => clearInterval(t);
   }, []);
 
-  if (!session) return <div className="overlay" />;
+  // Garde l'écran allumé pendant la séance.
+  useEffect(() => {
+    let lock: WakeLockSentinel | null = null;
+    const request = () => {
+      if (document.visibilityState === 'visible')
+        navigator.wakeLock?.request('screen').then((l) => (lock = l)).catch(() => {});
+    };
+    request();
+    document.addEventListener('visibilitychange', request);
+    return () => {
+      document.removeEventListener('visibilitychange', request);
+      lock?.release().catch(() => {});
+    };
+  }, []);
+
+  // Petit retour haptique à la fin du repos.
+  const restEnded = useRef(false);
+  useEffect(() => {
+    if (!rest) return;
+    if (rest.end - now > 0) restEnded.current = false;
+    else if (!restEnded.current) {
+      restEnded.current = true;
+      haptic();
+    }
+  }, [rest, now]);
+
+  if (!session) return null;
 
   const exercises = session.exercises;
   const firstOpen = exercises.findIndex((e) => e.sets.some((s) => !s.done));
@@ -50,6 +87,7 @@ export function SessionScreen({ id, onClose }: Props) {
   };
 
   const validate = () => {
+    haptic();
     const next = structuredClone(exercises);
     next[ei].sets[si].done = true;
     save(next);
@@ -61,6 +99,7 @@ export function SessionScreen({ id, onClose }: Props) {
   };
 
   const toggleSet = (j: number) => {
+    haptic();
     const next = structuredClone(exercises);
     next[ei].sets[j].done = !next[ei].sets[j].done;
     save(next);
@@ -81,24 +120,33 @@ export function SessionScreen({ id, onClose }: Props) {
     save(next);
   };
 
+  // On ferme d'abord (animation), puis on écrit en base, pour ne pas vider l'écran pendant qu'il descend.
+  const afterClose = () => new Promise((r) => setTimeout(r, 320));
+
   const finish = async () => {
+    haptic();
     const anyDone = exercises.some((e) => e.sets.some((s) => s.done));
+    onClose();
+    await afterClose();
     if (anyDone) await db.sessions.update(id, { finishedAt: Date.now() });
     else await db.sessions.delete(id);
-    onClose();
   };
 
   const abandon = async () => {
-    await db.sessions.delete(id);
     onClose();
+    await afterClose();
+    await db.sessions.delete(id);
   };
 
   return (
-    <div className="overlay">
-      <div className="screen" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+    <div className="scroll">
+      <div
+        className="content inset-page"
+        style={{ display: 'flex', flexDirection: 'column', minHeight: '100%', paddingTop: 'calc(var(--safe-top) + 8px)' }}
+      >
         <header className="row">
           <button type="button" className="icon-btn" aria-label="Réduire la séance" onClick={onClose}>
-            <IconClose size={18} />
+            <IconDown size={20} />
           </button>
           <div className="progress-segs grow" aria-label={`Exercice ${ei + 1} sur ${exercises.length}`}>
             {exercises.map((e, i) => (
@@ -272,10 +320,10 @@ function Stepper({ label, unit, value, step, onChange }: { label: string; unit?:
         {unit && <span className="small muted">{unit}</span>}
       </span>
       <span className="row" style={{ gap: 10 }}>
-        <button type="button" className="icon-btn soft" aria-label={`Diminuer ${label.toLowerCase()}`} onClick={() => onChange(value - step)}>
+        <button type="button" className="icon-btn soft" aria-label={`Diminuer ${label.toLowerCase()}`} onClick={() => { haptic(); onChange(value - step); }}>
           <IconMinus />
         </button>
-        <button type="button" className="icon-btn soft" aria-label={`Augmenter ${label.toLowerCase()}`} onClick={() => onChange(value + step)}>
+        <button type="button" className="icon-btn soft" aria-label={`Augmenter ${label.toLowerCase()}`} onClick={() => { haptic(); onChange(value + step); }}>
           <IconPlus />
         </button>
       </span>
