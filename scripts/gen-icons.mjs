@@ -32,22 +32,25 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc]);
 }
 
-function png(size) {
-  const raw = Buffer.alloc(size * (size * 3 + 1));
-  for (let y = 0; y < size; y++) {
-    const row = y * (size * 3 + 1);
+/** Image width × height ; le logo occupe un carré de `logo` px centré. */
+function png(width, height = width, logo = width) {
+  const ox = (width - logo) / 2;
+  const oy = (height - logo) / 2;
+  const raw = Buffer.alloc(height * (width * 3 + 1));
+  for (let y = 0; y < height; y++) {
+    const row = y * (width * 3 + 1);
     raw[row] = 0;
-    for (let x = 0; x < size; x++) {
-      const u = ((x + 0.5) / size) * 100;
-      const v = ((y + 0.5) / size) * 100;
+    for (let x = 0; x < width; x++) {
+      const u = ((x + 0.5 - ox) / logo) * 100;
+      const v = ((y + 0.5 - oy) / logo) * 100;
       const inside = SHAPES.some(([x0, y0, x1, y1]) => u >= x0 && u < x1 && v >= y0 && v < y1);
       const [r, g, b] = inside ? GOLD : BG;
       raw.set([r, g, b], row + 1 + x * 3);
     }
   }
   const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
   ihdr[8] = 8; // profondeur
   ihdr[9] = 2; // RGB
   return Buffer.concat([
@@ -62,4 +65,6 @@ mkdirSync('public', { recursive: true });
 for (const [name, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['apple-touch-icon.png', 180], ['favicon.png', 64]]) {
   writeFileSync(`public/${name}`, png(size));
 }
+// Écran de démarrage iOS — iPhone 13 Pro Max (428 × 926 pt @3x).
+writeFileSync('public/splash-1284x2778.png', png(1284, 2778, 420));
 console.log('Icônes générées dans public/');

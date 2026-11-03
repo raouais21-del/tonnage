@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['apple-touch-icon.png', 'favicon.png'],
+      includeAssets: ['apple-touch-icon.png', 'favicon.png', 'splash-1284x2778.png'],
       manifest: {
         name: 'Tonnage',
         short_name: 'Tonnage',
